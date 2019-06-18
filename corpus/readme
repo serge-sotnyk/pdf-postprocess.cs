@@ -1,0 +1,5 @@
+Corpus for training restoring text from PDF
+
+First char - line type:
+* - leave as is
++ - glue with previous
