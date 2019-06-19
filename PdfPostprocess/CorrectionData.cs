@@ -4,9 +4,8 @@ using System.Text;
 
 namespace PdfPostprocess
 {
-    public class CorrectionData
+    public class CorrectionData: PdfFeatures
     {
-        public string LineText { get; set; }
         public bool GlueWithPrevious { get; set; }
     }
 }

@@ -24,7 +24,8 @@ namespace PdfPostprocess.Common
                 var pathToCheck = Path.Combine(currentFolder.FullName, folderName);
                 if (Directory.Exists(pathToCheck))
                     return pathToCheck;
-            } while (currentFolder.Parent != null);
+                currentFolder = currentFolder.Parent;
+            } while (currentFolder != null);
             throw new DirectoryNotFoundException($"Folder '{folderName}' not found in every level of path '{startFolder}'");
         }
     }

@@ -39,7 +39,34 @@ namespace PdfPostprocess
             // Create MLContext to be shared across the model creation workflow objects 
             // Set a random seed for repeatable/deterministic results across multiple trainings.
             var mlContext = new MLContext(seed: 1);
-            var trainTestData = mlContext.Data.LoadFromEnumerable(LoadCorpus());
+            var trainingDataView = mlContext.Data.LoadFromEnumerable(LoadCorpus());
+            var dataProcessPipeline = //mlContext.Transforms.CopyColumns(outputColumnName: "Label", inputColumnName: nameof(CorrectionData.GlueWithPrevious))
+                mlContext.Transforms.Conversion
+                .MapValueToKey(outputColumnName: "Label", inputColumnName: nameof(CorrectionData.GlueWithPrevious))
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(PdfFeatures.FirstChars)))
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(PdfFeatures.PrevLastIsAlpha)))
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(PdfFeatures.PrevLastIsDigit)))
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(PdfFeatures.PrevLastIsLower)))
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(PdfFeatures.PrevLastIsPunct)))
+                .Append(mlContext.Transforms.Concatenate("Features", nameof(PdfFeatures.ThisLen), nameof(PdfFeatures.MeanLen), nameof(PdfFeatures.PrevLen), 
+                            nameof(PdfFeatures.FirstChars), nameof(PdfFeatures.PrevLastIsAlpha), nameof(PdfFeatures.PrevLastIsDigit), 
+                            nameof(PdfFeatures.PrevLastIsLower), nameof(PdfFeatures.PrevLastIsPunct)))
+                .AppendCacheCheckpoint(mlContext);
+            ConsoleHelper.PeekDataViewInConsole(mlContext, trainingDataView, dataProcessPipeline, 2);
+
+            IEstimator<ITransformer> trainer = mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression();
+
+            var trainingPipeline = dataProcessPipeline.Append(trainer);
+                //.Append(mlContext.Transforms.Conversion.MapKeyToVector("PredictedLabel"));
+
+            Console.WriteLine("=============== Cross-validating to get model's accuracy metrics ===============");
+            var crossValidationResults = 
+                mlContext.MulticlassClassification.CrossValidate(
+                    data: trainingDataView, 
+                    estimator: trainingPipeline, 
+                    numberOfFolds: 6, 
+                    labelColumnName: nameof(CorrectionData.GlueWithPrevious));
+
         }
 
         private static IEnumerable<CorrectionData> LoadCorpus()
@@ -47,18 +74,20 @@ namespace PdfPostprocess
             var res = new List<CorrectionData>();
             foreach(string fn in Directory.EnumerateFiles(CorpusPath, "*.txt"))
             {
-                var lines = File.ReadAllLines(fn);
-                var firstChar = lines[0][0];
+                var lines = File.ReadAllText(fn);
+                var firstChar = lines[0];
                 if (firstChar=='*' || firstChar == '+')
                 {
                     Console.WriteLine($"File '{fn}' has annotations, process it.");
-                    foreach(var line in lines)
-                    {
-                        res.Add(new CorrectionData { })
-                    }
+                    var featurizedText = Vectorizer.FeaturizeTextWithAnnotation(lines);
+                    res.AddRange(featurizedText);
+                }
+                else
+                {
+                    Console.WriteLine($"File '{fn}' doesn't have annotations, skipped.");
                 }
             }
-            throw new NotImplementedException();
+            return res;
         }
 
         /*
