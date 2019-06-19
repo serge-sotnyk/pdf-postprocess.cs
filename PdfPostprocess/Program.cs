@@ -1,4 +1,6 @@
-﻿using Microsoft.ML;
+﻿using Common.PdfPostprocess;
+using Microsoft.ML;
+using PdfPostprocess.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +13,7 @@ namespace PdfPostprocess
     {
         private static string AppPath => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
 
-        private static string BaseDatasetsRelativePath = @"../../../../corpus";
-        private static string DataSetRelativePath = $"{BaseDatasetsRelativePath}/corefx-issues-train.tsv";
-        private static string DataSetLocation = GetAbsolutePath(DataSetRelativePath);
+        private static string CorpusPath = FileUtils.FindFolderInRoots("corpus", AppPath);
 
         private static string BaseModelsRelativePath = @"../../../../MLModels";
         private static string ModelRelativePath = $"{BaseModelsRelativePath}/GitHubLabelerModel.zip";
@@ -26,7 +26,7 @@ namespace PdfPostprocess
         private static async Task Main(string[] args)
         {
             //1. ChainedBuilderExtensions and Train the model
-            BuildAndTrainModel(DataSetLocation, ModelPath, MyTrainerStrategy.OVAAveragedPerceptronTrainer);
+            BuildAndTrainModel();
             /*
             //2. Try/test to predict a label for a single hard-coded Issue
             TestSingleLabelPrediction(ModelPath);
@@ -34,7 +34,7 @@ namespace PdfPostprocess
             ConsoleHelper.ConsolePressAnyKey();
         }
 
-        public static void BuildAndTrainModel(string DataSetLocation, string ModelPath, MyTrainerStrategy selectedStrategy)
+        public static void BuildAndTrainModel()
         {
             // Create MLContext to be shared across the model creation workflow objects 
             // Set a random seed for repeatable/deterministic results across multiple trainings.
@@ -44,6 +44,20 @@ namespace PdfPostprocess
 
         private static IEnumerable<CorrectionData> LoadCorpus()
         {
+            var res = new List<CorrectionData>();
+            foreach(string fn in Directory.EnumerateFiles(CorpusPath, "*.txt"))
+            {
+                var lines = File.ReadAllLines(fn);
+                var firstChar = lines[0][0];
+                if (firstChar=='*' || firstChar == '+')
+                {
+                    Console.WriteLine($"File '{fn}' has annotations, process it.");
+                    foreach(var line in lines)
+                    {
+                        res.Add(new CorrectionData { })
+                    }
+                }
+            }
             throw new NotImplementedException();
         }
 

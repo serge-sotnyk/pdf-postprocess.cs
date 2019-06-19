@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PdfPostprocess
+namespace Common.PdfPostprocess
 {
     public static class ConsoleHelper
     {
