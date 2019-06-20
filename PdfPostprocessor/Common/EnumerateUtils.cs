@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PdfPostprocess.Common
+namespace PdfPostprocessor.Common
 {
     public static class EnumerateUtils
     {

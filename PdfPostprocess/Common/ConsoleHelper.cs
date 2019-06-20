@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Common.PdfPostprocess
+namespace ModelCreator.Common
 {
     public static class ConsoleHelper
     {

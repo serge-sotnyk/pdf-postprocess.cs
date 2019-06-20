@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using static PdfPostprocess.Common.StringUtils;
-using static PdfPostprocess.Common.EnumerateUtils;
+using static PdfPostprocessor.Common.StringUtils;
+using static PdfPostprocessor.Common.EnumerateUtils;
 using static System.Math;
-using static PdfPostprocess.Common.CloneUtils;
 
-namespace PdfPostprocess
+namespace PdfPostprocessor
 {
     public static class Vectorizer
     {
@@ -18,17 +17,28 @@ namespace PdfPostprocess
             {
                 var txt_line = line.Substring(1);
                 var features = LineToFeatures(txt_line, i, lines);
-                var featuresWithLabels = ConstructAndFill<PdfFeatures, CorrectionData>(features);
-                featuresWithLabels.GlueWithPrevious = line[0] == '+'; // True, if line should be glued with previous
-                res.Add(featuresWithLabels);
+                features.GlueWithPrevious = line[0] == '+'; // True, if line should be glued with previous
+                res.Add(features);
             }
             return res;
+        }
+
+        public static (IList<CorrectionData>, string[]) FeaturizeTextWoAnnotation(string text)
+        {
+            var lines = text.Trim().SplitLines();
+            var res = new List<CorrectionData>();
+            foreach (var (i, line) in lines.Enumerate())
+            {
+                var features = LineToFeatures(line, i, lines);
+                res.Add(features);
+            }
+            return (res, lines);
         }
 
         private static char LastChar(string line) 
             => string.IsNullOrEmpty(line) ? ' ' : line[line.Length - 1];
 
-        private static PdfFeatures LineToFeatures(string line, int i, string[] lines)
+        private static CorrectionData LineToFeatures(string line, int i, string[] lines)
         {
             var thisLen = line.Length;
             var meanLen = MeanInWindow(lines, i);
@@ -38,7 +48,7 @@ namespace PdfPostprocess
                 prevLen = lines[i - 1].Length - 1;
                 lastPrevChar = LastChar(lines[i - 1]);
             }
-            var features = new PdfFeatures
+            var features = new CorrectionData
             {
                 ThisLen = thisLen,
                 MeanLen = meanLen,

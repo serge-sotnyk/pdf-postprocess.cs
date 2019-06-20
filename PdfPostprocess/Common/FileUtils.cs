@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace PdfPostprocess.Common
+namespace ModelCreator.Common
 {
     public static class FileUtils
     {

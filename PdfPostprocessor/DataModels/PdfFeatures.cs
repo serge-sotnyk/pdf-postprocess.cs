@@ -1,4 +1,4 @@
-﻿namespace PdfPostprocess
+﻿namespace PdfPostprocessor
 {
     public class PdfFeatures
     {

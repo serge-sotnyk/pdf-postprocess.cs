@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace PdfPostprocess.Common
+namespace ModelCreator.Common
 {
     public static class CloneUtils
     {
