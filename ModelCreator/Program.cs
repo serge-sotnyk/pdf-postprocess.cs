@@ -2,12 +2,10 @@
 using Microsoft.ML.Data;
 using ModelCreator.Common;
 using PdfPostprocessor;
-using PdfPostprocessor.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using static Microsoft.ML.DataOperationsCatalog;
 
 namespace ModelCreator
@@ -63,17 +61,16 @@ namespace ModelCreator
             IEstimator<ITransformer> trainer = mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression();
 
             var trainingPipeline = dataProcessPipeline.Append(trainer);
-            //.Append(mlContext.Transforms.Conversion.MapKeyToVector("PredictedLabel"));
 
-            // STEP 4: Train the model fitting to the DataSet
+            // Train the model fitting to the DataSet
             ITransformer trainedModel = trainingPipeline.Fit(trainingData);
 
-            // STEP 5: Evaluate the model and show accuracy stats
+            // Evaluate the model and show accuracy stats
             var predictions = trainedModel.Transform(testData);
             var metrics = mlContext.BinaryClassification.Evaluate(data: predictions, labelColumnName: "Label", scoreColumnName: "Score");
             ConsoleHelper.PrintBinaryClassificationMetrics(trainer.ToString(), metrics);
 
-            // STEP 6: Save/persist the trained model to a .ZIP file
+            // Save/persist the trained model to a .ZIP file
             Directory.CreateDirectory(ModelDir);
             mlContext.Model.Save(trainedModel, trainingData.Schema, ModelFileName);
             Console.WriteLine($"Model has been written into '{ModelFileName}'");
@@ -127,7 +124,7 @@ y Corresponding Author: Dr.Krishna Sivalingam. Part of the research was
 supported by Air Force Oce of Scientic Research grants F-49620-97-1-
 0471 and F-49620-99-1-0125; by Telcordia Technologies and by Intel. Part of
 the work was done while the rst author was at Washington State Univer-
-sity.The authors' can be reached at cej@bbn.com, krishna@eecs.wsu.edu,
+sity. The authors' can be reached at cej@bbn.com, krishna@eecs.wsu.edu,
 pagrawal @research.telcordia.com, jcchen @research.telcordia.com
 c
 2001 Kluwer Academic Publishers. Printed in the Netherlands.
