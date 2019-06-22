@@ -4,10 +4,23 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>PdfPostprocessor.snk</AssemblyOriginatorKeyFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Serge Sotnyk</Authors>
+    <Company>Iveonik Systems</Company>
+    <PackageTags>ML.NET, PDF postprocess, OCR postprocess</PackageTags>
+    <RepositoryUrl>https://github.com/serge-sotnyk/pdf-postprocess.cs</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/serge-sotnyk/pdf-postprocess.cs</PackageProjectUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="PdfPostprocessModel.zip" />
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
